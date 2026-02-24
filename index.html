@@ -6,73 +6,109 @@
 <title>LA Staff System</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#0f1117;color:#fff}
+body{font-family:Arial;background:#0f0f0f;color:white;margin:0}
+.center-login{display:flex;justify-content:center;align-items:center;height:100vh}
+.login-box{background:#1a1a1a;padding:30px;border-radius:10px;width:320px;text-align:center}
+input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:none}
+button{padding:6px 10px;margin:4px;border:none;border-radius:5px;cursor:pointer}
+
+.save{background:#00c853;color:white}
+.edit{background:#ff9800;color:white}
+.delete{background:#d32f2f;color:white}
+.creator{background:#9c27b0;color:white}
+.lock{background:#607d8b;color:white}
+.sort{background:#3f51b5;color:white}
+
 .hidden{display:none}
-.center{display:flex;justify-content:center;align-items:center;height:100vh}
-.card{background:#1a1f2b;padding:30px;border-radius:12px;width:340px}
-input,select{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:none;background:#111;color:#fff}
-button{padding:8px 12px;border-radius:6px;border:none;cursor:pointer;margin-top:6px}
-.btn{background:#5865f2;color:#fff}
-.btn-red{background:#ff5252;color:#fff}
-.btn-green{background:#00c853;color:#fff}
-.container{padding:20px;max-width:1000px;margin:auto}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{padding:8px;text-align:center;border-bottom:1px solid #333}
-th{background:#111}
+.container{padding:20px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px;border-bottom:1px solid #333;text-align:center}
+th{background:#1f1f1f}
+
+.rank-owner{color:#ff5252;font-weight:bold}
+.rank-management{color:#00e5ff;font-weight:bold}
+.rank-admin{color:#ffd740;font-weight:bold}
+.rank-mod{color:#69f0ae;font-weight:bold}
+
+.dashboard{background:#1a1a1a;padding:15px;border-radius:10px;margin-bottom:15px}
 </style>
 </head>
 <body>
 
-<div id="loginScreen" class="center">
-<div class="card">
+<div class="center-login" id="loginScreen">
+<div class="login-box">
 <h2>Login</h2>
-<input id="loginUser" placeholder="User">
+<input id="loginUser" placeholder="Benutzername">
 <input id="loginPass" type="password" placeholder="Passwort">
-<button id="loginBtn" class="btn">Login</button>
+<button class="save" onclick="login()">Login</button>
 </div>
 </div>
 
 <div id="mainPanel" class="hidden container">
-<button id="logoutBtn">Logout</button>
 
-<h3>Staff hinzufügen</h3>
-<input id="roblox" placeholder="Roblox">
-<input id="discord" placeholder="Discord">
+<button onclick="logout()">Logout</button>
+<button class="creator hidden" id="creatorBtn" onclick="toggleCreator()">Creator Panel</button>
+<button class="lock hidden" id="lockBtn" onclick="toggleLock()">Lockdown</button>
+
+<div class="dashboard">
+<h3>Wochen Dashboard</h3>
+<div id="dashboardStats"></div>
+<button class="sort" onclick="sortByRank()">Nach Rang sortieren</button>
+</div>
+
+<h3>Staff hinzufügen / bearbeiten</h3>
+<input type="hidden" id="editId">
+<input id="roblox" placeholder="Roblox Username">
+<input id="discord" placeholder="Discord Username">
 <select id="rank">
 <option>Creator</option>
 <option>Manager</option>
+<option>Head of Administration</option>
 <option>Administration</option>
 <option>Moderator</option>
 </select>
 <input type="number" id="minutesWeek" placeholder="Minuten Woche">
 <input type="number" id="minutesTotal" placeholder="Minuten Total">
 <input type="number" id="tickets" placeholder="Tickets">
-<label><input type="checkbox" id="notice"> Notice</label>
-<br>
-<button id="saveBtn" class="btn-green">Speichern</button>
+<label><input type="checkbox" id="notice"> On Notice</label>
+<button class="save" onclick="saveStaff()">Speichern</button>
 
+<h3>Interne Übersicht</h3>
 <table>
 <thead>
 <tr>
-<th>Roblox</th>
-<th>Discord</th>
-<th>Rank</th>
-<th>Woche</th>
-<th>Total</th>
-<th>Tickets</th>
-<th>Notice</th>
-<th>Löschen</th>
+<th>Roblox</th><th>Discord</th><th>Rank</th>
+<th>Woche</th><th>Total</th><th>Tickets</th>
+<th>Notice</th><th>Aktionen</th>
 </tr>
 </thead>
 <tbody id="staffTable"></tbody>
 </table>
+
+<div id="creatorPanel" class="hidden">
+<h3>Creator Panel</h3>
+
+<h4>Admin Verwaltung</h4>
+<input type="hidden" id="adminEditId">
+<input id="adminUser" placeholder="Admin Benutzername">
+<input id="adminPass" placeholder="Admin Passwort">
+<button class="save" onclick="saveAdmin()">Admin Speichern</button>
+
+<table>
+<thead><tr><th>User</th><th>Aktionen</th></tr></thead>
+<tbody id="adminTable"></tbody>
+</table>
+
+<h4>Creator Logs</h4>
+<div id="logsBox" style="background:#111;padding:10px;height:150px;overflow:auto"></div>
+
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-
 const { createClient } = supabase;
 
 const supabaseClient = createClient(
@@ -80,79 +116,287 @@ const supabaseClient = createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI"
 );
 
-const loginScreen = document.getElementById("loginScreen");
-const mainPanel = document.getElementById("mainPanel");
+let currentUser="";
+let locked=false;
 
-document.getElementById("loginBtn").addEventListener("click", login);
-document.getElementById("logoutBtn").addEventListener("click", logout);
-document.getElementById("saveBtn").addEventListener("click", saveStaff);
+/* ------------------ HELPER ------------------ */
+
+async function safeQuery(promise){
+const { data, error } = await promise;
+if(error){
+console.error(error);
+alert("Supabase Fehler: " + error.message);
+return { data:null };
+}
+return { data };
+}
+
+/* ------------------ LOGIN ------------------ */
 
 async function login(){
-const user = document.getElementById("loginUser").value;
-const pass = document.getElementById("loginPass").value;
+const user=loginUser.value;
+const pass=loginPass.value;
 
-if(user === "MrRecc" && pass === "andrej8968"){
+if(user==="MrRecc" && pass==="andrej8968"){
+currentUser="creator";
+creatorBtn.classList.remove("hidden");
+lockBtn.classList.remove("hidden");
+}
+else{
+const res = await safeQuery(
+supabaseClient.from("admins").select("*")
+);
+
+if(!res.data) return;
+
+const found=res.data.find(a=>a.user===user && a.pass===pass);
+if(!found){
+alert("Login falsch");
+return;
+}
+
+currentUser="admin";
+}
+
 loginScreen.classList.add("hidden");
 mainPanel.classList.remove("hidden");
 loadStaff();
-}else{
-alert("Login falsch");
-}
+
+if(currentUser==="creator") loadAdmins();
 }
 
-function logout(){
-location.reload();
-}
+function logout(){ location.reload(); }
+
+/* ------------------ STAFF ------------------ */
 
 async function saveStaff(){
+if(locked) return alert("System im Lockdown!");
 
-const payload = {
-roblox: document.getElementById("roblox").value,
-discord: document.getElementById("discord").value,
-rank: document.getElementById("rank").value,
-minutesweek: +document.getElementById("minutesWeek").value || 0,
-minutestotal: +document.getElementById("minutesTotal").value || 0,
-tickets: +document.getElementById("tickets").value || 0,
-notice: document.getElementById("notice").checked
-};
+const edit=editId.value;
 
-await supabaseClient.from("staff").insert([payload]);
+if(edit){
+await safeQuery(
+supabaseClient.from("staff").update({
+roblox:roblox.value,
+discord:discord.value,
+rank:rank.value,
+minutesweek:+minutesWeek.value||0,
+minutestotal:+minutesTotal.value||0,
+tickets:+tickets.value||0,
+notice:notice.checked
+}).eq("id",edit)
+);
+
+log("Staff bearbeitet");
+}
+else{
+await safeQuery(
+supabaseClient.from("staff").insert([{
+roblox:roblox.value,
+discord:discord.value,
+rank:rank.value,
+minutesweek:+minutesWeek.value||0,
+minutestotal:+minutesTotal.value||0,
+tickets:+tickets.value||0,
+notice:notice.checked
+}])
+);
+
+log("Staff hinzugefügt");
+}
+
+editId.value="";
 loadStaff();
 }
 
 async function loadStaff(){
-const { data, error } = await supabaseClient.from("staff").select("*");
+const res = await safeQuery(
+supabaseClient.from("staff").select("*")
+);
 
-if(error){
-console.error(error);
-return;
-}
+if(!res.data) return;
 
-const table = document.getElementById("staffTable");
-table.innerHTML = "";
+staffTable.innerHTML="";
+let totalMin=0,totalTickets=0;
 
-data.forEach(s => {
-table.innerHTML += `
+res.data.forEach(s=>{
+totalMin+=s.minutesweek||0;
+totalTickets+=s.tickets||0;
+
+staffTable.innerHTML+=`
 <tr>
 <td>${s.roblox}</td>
 <td>${s.discord}</td>
-<td>${s.rank}</td>
-<td>${s.minutesweek}</td>
-<td>${s.minutestotal}</td>
-<td>${s.tickets}</td>
-<td>${s.notice ? "⚠️" : ""}</td>
-<td><button onclick="deleteStaff(${s.id})">X</button></td>
-</tr>
-`;
+<td class="${getRankClass(s.rank)}">${s.rank}</td>
+<td>${s.minutesweek||0}</td>
+<td>${s.minutestotal||0}</td>
+<td>${s.tickets||0}</td>
+<td>${s.notice?"⚠️":""}</td>
+<td>
+<button class="edit" onclick="editStaff(${s.id})">Bearbeiten</button>
+<button class="delete" onclick="deleteStaff(${s.id})">X</button>
+</td>
+</tr>`;
 });
+
+dashboardStats.innerHTML=
+"Gesamt Minuten: "+totalMin+
+"<br>Gesamt Tickets: "+totalTickets+
+"<br>Staff Anzahl: "+res.data.length;
 }
 
-window.deleteStaff = async function(id){
-await supabaseClient.from("staff").delete().eq("id", id);
+async function editStaff(id){
+const res = await safeQuery(
+supabaseClient.from("staff").select("*").eq("id",id)
+);
+
+if(!res.data || !res.data.length) return;
+
+const s=res.data[0];
+
+editId.value=s.id;
+roblox.value=s.roblox;
+discord.value=s.discord;
+rank.value=s.rank;
+minutesWeek.value=s.minutesweek;
+minutesTotal.value=s.minutestotal;
+tickets.value=s.tickets;
+notice.checked=s.notice;
+}
+
+async function deleteStaff(id){
+await safeQuery(
+supabaseClient.from("staff").delete().eq("id",id)
+);
+log("Staff gelöscht");
 loadStaff();
 }
 
+/* ------------------ ADMIN ------------------ */
+
+async function saveAdmin(){
+const edit=adminEditId.value;
+
+if(edit){
+await safeQuery(
+supabaseClient.from("admins").update({
+user:adminUser.value,
+pass:adminPass.value
+}).eq("id",edit)
+);
+log("Admin bearbeitet");
+}
+else{
+await safeQuery(
+supabaseClient.from("admins").insert([{
+user:adminUser.value,
+pass:adminPass.value
+}])
+);
+log("Admin erstellt");
+}
+
+adminEditId.value="";
+loadAdmins();
+}
+
+async function loadAdmins(){
+const res = await safeQuery(
+supabaseClient.from("admins").select("*")
+);
+
+if(!res.data) return;
+
+adminTable.innerHTML="";
+res.data.forEach(a=>{
+adminTable.innerHTML+=`
+<tr>
+<td>${a.user}</td>
+<td>
+<button class="edit" onclick="editAdmin(${a.id})">Bearbeiten</button>
+<button class="delete" onclick="deleteAdmin(${a.id})">X</button>
+</td>
+</tr>`;
 });
+}
+
+async function editAdmin(id){
+const res = await safeQuery(
+supabaseClient.from("admins").select("*").eq("id",id)
+);
+
+if(!res.data || !res.data.length) return;
+
+const a=res.data[0];
+adminEditId.value=a.id;
+adminUser.value=a.user;
+adminPass.value=a.pass;
+}
+
+async function deleteAdmin(id){
+await safeQuery(
+supabaseClient.from("admins").delete().eq("id",id)
+);
+log("Admin gelöscht");
+loadAdmins();
+}
+
+/* ------------------ LOCKDOWN ------------------ */
+
+function toggleCreator(){
+creatorPanel.classList.toggle("hidden");
+loadLogs();
+}
+
+function toggleLock(){
+locked=!locked;
+log("Lockdown geändert: "+locked);
+}
+
+/* ------------------ SORT ------------------ */
+
+async function sortByRank(){
+const order=["Creator","Manager","Head of Administration","Administration","Moderator"];
+
+const res = await safeQuery(
+supabaseClient.from("staff").select("*")
+);
+
+if(!res.data) return;
+
+res.data.sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank));
+
+for(let i=0;i<res.data.length;i++){
+await supabaseClient.from("staff")
+.update({sort_index:i})
+.eq("id",res.data[i].id);
+}
+
+loadStaff();
+}
+
+/* ------------------ LOGS ------------------ */
+
+async function log(text){
+await safeQuery(
+supabaseClient.from("logs").insert([{message:text}])
+);
+}
+
+async function loadLogs(){
+const res = await safeQuery(
+supabaseClient.from("logs")
+.select("*")
+.order("id",{ascending:false})
+);
+
+if(!res.data) return;
+
+logsBox.innerHTML=res.data.map(l=>l.message).join("<br>");
+}
 </script>
 </body>
 </html>
+
+
+
