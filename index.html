@@ -3,364 +3,317 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Los Angeles Staff System COMPLETE</title>
+<title>LA Staff System</title>
 
 <style>
-body { font-family: Arial; background:#0f0f0f; color:white; margin:0; }
-.center-login { display:flex; justify-content:center; align-items:center; height:100vh; }
-.login-box { background:#1a1a1a; padding:30px; border-radius:10px; width:300px; text-align:center; }
-input, select { width:100%; padding:8px; margin:6px 0; border-radius:5px; border:none; }
-button { padding:6px 10px; margin:4px; border:none; border-radius:5px; cursor:pointer; }
+body{font-family:Arial;background:#0f0f0f;color:white;margin:0}
+.center-login{display:flex;justify-content:center;align-items:center;height:100vh}
+.login-box{background:#1a1a1a;padding:30px;border-radius:10px;width:320px;text-align:center}
+input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:none}
+button{padding:6px 10px;margin:4px;border:none;border-radius:5px;cursor:pointer}
 
-.save-btn{background:#00c853;color:white;}
-.edit-btn{background:#ff9800;color:white;}
-.delete-btn{background:#d32f2f;color:white;}
-.creator-btn{background:#9c27b0;color:white;}
-.lock-btn{background:#607d8b;color:white;}
-.sort-btn{background:#673ab7;color:white;}
-.toggle-btn{background:#444;color:white;}
+.save{background:#00c853;color:white}
+.edit{background:#ff9800;color:white}
+.delete{background:#d32f2f;color:white}
+.creator{background:#9c27b0;color:white}
+.lock{background:#607d8b;color:white}
+.sort{background:#3f51b5;color:white}
 
-.container{padding:15px;}
-table{ width:100%; border-collapse:collapse; font-size:13px; }
-th,td{ padding:6px; border-bottom:1px solid #333; text-align:center; }
-th{background:#1f1f1f;}
+.hidden{display:none}
+.container{padding:20px}
 
-.rank-owner{color:#ff5252;font-weight:bold;}
-.rank-management{color:#00e5ff;font-weight:bold;}
-.rank-admin{color:#ffd740;font-weight:bold;}
-.rank-mod{color:#69f0ae;font-weight:bold;}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px;border-bottom:1px solid #333;text-align:center}
+th{background:#1f1f1f}
 
-function getRankClass(rank){
+.rank-owner{color:#ff5252;font-weight:bold}
+.rank-management{color:#00e5ff;font-weight:bold}
+.rank-admin{color:#ffd740;font-weight:bold}
+.rank-mod{color:#69f0ae;font-weight:bold}
 
-if(rank.includes("Creator") || rank.includes("Projektleitung"))
-    return "rank-owner";
-
-if(rank.includes("Manager") || rank.includes("Teamverwaltung"))
-    return "rank-management";
-
-if(rank.includes("Head") || rank.includes("Administration"))
-    return "rank-admin";
-
-if(rank.includes("Moderator"))
-    return "rank-mod";
-
-return "";
-}
-
-.green{color:#00ff88;font-weight:bold;}
-.red{color:#ff4444;font-weight:bold;}
-.hidden{display:none;}
-
-.dashboard{background:#1a1a1a;padding:15px;border-radius:10px;margin-bottom:15px;}
-.dragging{opacity:0.5;}
+.dashboard{background:#1a1a1a;padding:15px;border-radius:10px;margin-bottom:15px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="center-login" id="loginScreen">
 <div class="login-box">
-<h2>Staff System Login</h2>
-<input type="text" id="loginUser" placeholder="Benutzername">
-<input type="password" id="loginPass" placeholder="Passwort">
-<button class="save-btn" onclick="login()">Login</button>
+<h2>Login</h2>
+<input id="loginUser" placeholder="Benutzername">
+<input id="loginPass" type="password" placeholder="Passwort">
+<button class="save" onclick="login()">Login</button>
 </div>
 </div>
 
-<!-- PUBLIC -->
-<div class="container">
-<button class="toggle-btn" onclick="togglePublic()">Team anzeigen / ausblenden</button>
-<div id="publicSection">
-<h3>Öffentliche Team Übersicht</h3>
-<table>
-<thead>
-<tr>
-<th>Roblox</th><th>Rank</th><th>Woche</th><th>Total</th><th>Tickets</th>
-</tr>
-</thead>
-<tbody id="publicStaffTable"></tbody>
-</table>
-</div>
-</div>
-
-<!-- MAIN PANEL -->
 <div id="mainPanel" class="hidden container">
 
 <button onclick="logout()">Logout</button>
-<button class="creator-btn hidden" id="creatorBtn" onclick="toggleCreator()">Creator Panel</button>
-<button class="lock-btn hidden" id="lockBtn" onclick="lockSystem()">Lockdown</button>
+<button class="creator hidden" id="creatorBtn" onclick="toggleCreator()">Creator Panel</button>
+<button class="lock hidden" id="lockBtn" onclick="toggleLock()">Lockdown</button>
 
 <div class="dashboard">
 <h3>Wochen Dashboard</h3>
 <div id="dashboardStats"></div>
-<button class="sort-btn" onclick="sortByRank()">Nach Rang sortieren</button>
+<button class="sort" onclick="sortByRank()">Nach Rang sortieren</button>
 </div>
 
 <h3>Staff hinzufügen / bearbeiten</h3>
-<input type="hidden" id="editIndex">
-<input type="text" id="roblox" placeholder="Roblox Username">
-<input type="text" id="discord" placeholder="Discord Username">
-
+<input type="hidden" id="editId">
+<input id="roblox" placeholder="Roblox Username">
+<input id="discord" placeholder="Discord Username">
 <select id="rank">
 <option>Creator</option>
-<option>Co-Creator</option>
-<option>Projektleitung</option>
-<option>Stv.Projektleitung</option>
 <option>Manager</option>
-<option>Community Manager</option>
-<option>Teamverwaltung</option>
-<option>Stv. Teamverwaltung</option>
 <option>Head of Administration</option>
-<option>Head of Moderation</option>
-<option>Senior Administration</option>
 <option>Administration</option>
-<option>Junior Administration</option>
-<option>Senior Moderator</option>
 <option>Moderator</option>
-<option>Junior Moderator</option>
 </select>
-
 <input type="number" id="minutesWeek" placeholder="Minuten Woche">
 <input type="number" id="minutesTotal" placeholder="Minuten Total">
 <input type="number" id="tickets" placeholder="Tickets">
 <label><input type="checkbox" id="notice"> On Notice</label>
+<button class="save" onclick="saveStaff()">Speichern</button>
 
-<button class="save-btn" onclick="saveStaff()">Speichern</button>
-
-<h3>Interne Staff Übersicht (Drag & Drop aktiv)</h3>
+<h3>Interne Übersicht</h3>
 <table>
 <thead>
 <tr>
 <th>Roblox</th><th>Discord</th><th>Rank</th>
 <th>Woche</th><th>Total</th><th>Tickets</th>
-<th>Status</th><th>Notice</th><th>Aktionen</th>
+<th>Notice</th><th>Aktionen</th>
 </tr>
 </thead>
 <tbody id="staffTable"></tbody>
 </table>
 
-<!-- CREATOR PANEL -->
 <div id="creatorPanel" class="hidden">
 <h3>Creator Panel</h3>
 
 <h4>Admin Verwaltung</h4>
-<input type="hidden" id="adminEditIndex">
-<input type="text" id="adminUser" placeholder="Admin Benutzername">
-<input type="password" id="adminPass" placeholder="Admin Passwort">
-<button class="save-btn" onclick="saveAdmin()">Admin Speichern</button>
+<input type="hidden" id="adminEditId">
+<input id="adminUser" placeholder="Admin Benutzername">
+<input id="adminPass" placeholder="Admin Passwort">
+<button class="save" onclick="saveAdmin()">Admin Speichern</button>
 
 <table>
-<thead>
-<tr><th>User</th><th>Aktionen</th></tr>
-</thead>
+<thead><tr><th>User</th><th>Aktionen</th></tr></thead>
 <tbody id="adminTable"></tbody>
 </table>
 
-<h4>Security Logs</h4>
-<div id="logsBox" style="background:#111;padding:10px;height:150px;overflow:auto;font-size:12px;"></div>
-
-<button class="lock-btn" onclick="unlockSystem()">Unlock System</button>
-</div>
+<h4>Creator Logs</h4>
+<div id="logsBox" style="background:#111;padding:10px;height:150px;overflow:auto"></div>
 
 </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+const { createClient } = supabase;
 
-// =======================
-// SUPABASE CONFIG
-// =======================
-
-const SUPABASE_URL = "https://aszymljelmsrjcdmngxc.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI";
-
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+const supabaseClient = createClient(
+"https://aszymljelmsrjcdmngxc.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI"
 );
-
-// =======================
-// LOGIN DATA
-// =======================
-
-const CREATOR_USER="MrRecc";
-const CREATOR_PASS="andrej8968";
-const MASTER_PASSWORD="MASTERKEY1711";
 
 let currentUser="";
 let locked=false;
-let deleteCounter=0;
 
-// =======================
-// LOGIN
-// =======================
+function getRankClass(rank){
+if(rank==="Creator") return "rank-owner";
+if(rank==="Manager") return "rank-management";
+if(rank.includes("Administration")) return "rank-admin";
+return "rank-mod";
+}
 
-function login(){
-if(locked){ alert("System ist im Lockdown!"); return; }
+function logout(){ location.reload(); }
 
+async function login(){
 const user=loginUser.value;
 const pass=loginPass.value;
 
-if(user===CREATOR_USER && pass===CREATOR_PASS){
+if(user==="MrRecc" && pass==="andrej8968"){
 currentUser="creator";
 creatorBtn.classList.remove("hidden");
 lockBtn.classList.remove("hidden");
 }
 else{
-alert("Login falsch");
-return;
+const { data } = await supabaseClient.from("admins").select("*");
+const found=data.find(a=>a.user===user && a.pass===pass);
+if(!found) return alert("Login falsch");
+currentUser="admin";
 }
 
 loginScreen.classList.add("hidden");
 mainPanel.classList.remove("hidden");
 loadStaff();
+if(currentUser==="creator") loadAdmins();
 }
-
-// =======================
-// LOGOUT
-// =======================
-
-function logout(){ location.reload(); }
-
-// =======================
-// SAVE STAFF (SUPABASE)
-// =======================
 
 async function saveStaff(){
+if(locked) return alert("System im Lockdown!");
 
-if(locked) return alert("System ist im Lockdown!");
+const edit=editId.value;
 
-const { error } = await supabase
-.from("staff")
-.insert([{
-roblox: roblox.value,
-discord: discord.value,
-rank: rank.value,
-minutesweek: +minutesWeek.value || 0,
-minutestotal: +minutesTotal.value || 0,
-tickets: +tickets.value || 0,
-notice: notice.checked
+if(edit){
+await supabaseClient.from("staff").update({
+roblox:roblox.value,
+discord:discord.value,
+rank:rank.value,
+minutesweek:+minutesWeek.value||0,
+minutestotal:+minutesTotal.value||0,
+tickets:+tickets.value||0,
+notice:notice.checked
+}).eq("id",edit);
+log("Staff bearbeitet");
+}
+else{
+await supabaseClient.from("staff").insert([{
+roblox:roblox.value,
+discord:discord.value,
+rank:rank.value,
+minutesweek:+minutesWeek.value||0,
+minutestotal:+minutesTotal.value||0,
+tickets:+tickets.value||0,
+notice:notice.checked
 }]);
-
-if(error){
-alert("Fehler: "+error.message);
-console.error(error);
+log("Staff hinzugefügt");
 }
-else{
+
+editId.value="";
 loadStaff();
 }
-}
-
-// =======================
-// DELETE STAFF
-// =======================
-
-async function deleteStaff(id){
-
-if(currentUser!=="creator") return;
-
-const { error } = await supabase
-.from("staff")
-.delete()
-.eq("id", id);
-
-if(error){
-alert("Fehler beim Löschen");
-console.error(error);
-}
-else{
-loadStaff();
-}
-}
-
-// =======================
-// LOAD STAFF
-// =======================
 
 async function loadStaff(){
-
-const { data, error } = await supabase
-.from("staff")
-.select("*")
-.order("rank",{ascending:true});
-
-if(error){
-console.error(error);
-return;
-}
-
+const { data } = await supabaseClient.from("staff").select("*");
 staffTable.innerHTML="";
-publicStaffTable.innerHTML="";
+let totalMin=0,totalTickets=0;
 
-let totalMinutes=0;
-let totalTickets=0;
-
-data.forEach((s)=>{
-
-totalMinutes+=s.minutesweek || 0;
-totalTickets+=s.tickets || 0;
+data.forEach(s=>{
+totalMin+=s.minutesweek||0;
+totalTickets+=s.tickets||0;
 
 staffTable.innerHTML+=`
 <tr>
 <td>${s.roblox}</td>
 <td>${s.discord}</td>
-<td>${s.rank}</td>
+<td class="${getRankClass(s.rank)}">${s.rank}</td>
 <td>${s.minutesweek}</td>
 <td>${s.minutestotal}</td>
 <td>${s.tickets}</td>
 <td>${s.notice?"⚠️":""}</td>
-<td><button class="delete-btn" onclick="deleteStaff('${s.id}')">X</button></td>
+<td>
+<button class="edit" onclick="editStaff(${s.id})">Bearbeiten</button>
+<button class="delete" onclick="deleteStaff(${s.id})">X</button>
+</td>
 </tr>`;
-
-publicStaffTable.innerHTML+=`
-<tr>
-<td>${s.roblox}</td>
-<td>${s.rank}</td>
-<td>${s.minutesweek}</td>
-<td>${s.minutestotal}</td>
-<td>${s.tickets}</td>
-</tr>`;
-
 });
 
-dashboardStats.innerHTML=`
-Gesamt Minuten: <b>${totalMinutes}</b><br>
-Gesamt Tickets: <b>${totalTickets}</b><br>
-Staff Anzahl: <b>${data.length}</b>
-`;
+dashboardStats.innerHTML=
+"Gesamt Minuten: "+totalMin+
+"<br>Gesamt Tickets: "+totalTickets+
+"<br>Staff Anzahl: "+data.length;
 }
 
-// =======================
-// LOCK SYSTEM
-// =======================
-
-function lockSystem(){
-if(currentUser!=="creator") return;
-locked=true;
-alert("System gesperrt");
+async function editStaff(id){
+const { data } = await supabaseClient.from("staff").select("*").eq("id",id);
+const s=data[0];
+editId.value=s.id;
+roblox.value=s.roblox;
+discord.value=s.discord;
+rank.value=s.rank;
+minutesWeek.value=s.minutesweek;
+minutesTotal.value=s.minutestotal;
+tickets.value=s.tickets;
+notice.checked=s.notice;
 }
 
-function unlockSystem(){
-const key=prompt("Creator Passwort:");
-if(key===CREATOR_PASS){
-locked=false;
-alert("System entsperrt");
-}
+async function deleteStaff(id){
+await supabaseClient.from("staff").delete().eq("id",id);
+log("Staff gelöscht");
+loadStaff();
 }
 
-// =======================
-// PUBLIC TOGGLE
-// =======================
-
-function togglePublic(){
-publicSection.classList.toggle("hidden");
+function toggleCreator(){
+creatorPanel.classList.toggle("hidden");
+loadLogs();
 }
 
-// =======================
-// INIT
-// =======================
+function toggleLock(){
+locked=!locked;
+log("Lockdown geändert");
+}
 
-document.addEventListener("DOMContentLoaded", loadStaff);
+async function saveAdmin(){
+const edit=adminEditId.value;
 
+if(edit){
+await supabaseClient.from("admins").update({
+user:adminUser.value,
+pass:adminPass.value
+}).eq("id",edit);
+log("Admin bearbeitet");
+}
+else{
+await supabaseClient.from("admins").insert([{
+user:adminUser.value,
+pass:adminPass.value
+}]);
+log("Admin erstellt");
+}
+
+adminEditId.value="";
+loadAdmins();
+}
+
+async function loadAdmins(){
+const { data } = await supabaseClient.from("admins").select("*");
+adminTable.innerHTML="";
+data.forEach(a=>{
+adminTable.innerHTML+=`
+<tr>
+<td>${a.user}</td>
+<td>
+<button class="edit" onclick="editAdmin(${a.id})">Bearbeiten</button>
+<button class="delete" onclick="deleteAdmin(${a.id})">X</button>
+</td>
+</tr>`;
+});
+}
+
+async function editAdmin(id){
+const { data } = await supabaseClient.from("admins").select("*").eq("id",id);
+const a=data[0];
+adminEditId.value=a.id;
+adminUser.value=a.user;
+adminPass.value=a.pass;
+}
+
+async function deleteAdmin(id){
+await supabaseClient.from("admins").delete().eq("id",id);
+log("Admin gelöscht");
+loadAdmins();
+}
+
+async function sortByRank(){
+const order=["Creator","Manager","Head of Administration","Administration","Moderator"];
+const { data } = await supabaseClient.from("staff").select("*");
+data.sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank));
+for(let i=0;i<data.length;i++){
+await supabaseClient.from("staff").update({created_at:new Date()}).eq("id",data[i].id);
+}
+loadStaff();
+}
+
+async function log(text){
+await supabaseClient.from("logs").insert([{message:text}]);
+loadLogs();
+}
+
+async function loadLogs(){
+const { data } = await supabaseClient.from("logs").select("*").order("id",{ascending:false});
+logsBox.innerHTML=data.map(l=>l.message).join("<br>");
+}
 </script>
 </body>
 </html>
