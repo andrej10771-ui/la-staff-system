@@ -15,12 +15,10 @@ button{padding:8px 12px;border-radius:6px;border:none;cursor:pointer;margin-top:
 .btn{background:#5865f2;color:#fff}
 .btn-red{background:#ff5252;color:#fff}
 .btn-green{background:#00c853;color:#fff}
-.container{padding:20px;max-width:1200px;margin:auto}
+.container{padding:20px;max-width:1000px;margin:auto}
 table{width:100%;border-collapse:collapse;margin-top:15px}
 th,td{padding:8px;text-align:center;border-bottom:1px solid #333}
 th{background:#111}
-.dashboard{background:#1a1f2b;padding:15px;border-radius:10px;margin-bottom:20px}
-.logs{background:#111;padding:10px;border-radius:10px;height:150px;overflow:auto}
 </style>
 </head>
 <body>
@@ -29,23 +27,15 @@ th{background:#111}
 <div class="card">
 <h2>Login</h2>
 <input id="loginUser" placeholder="User">
-<input id="loginPass" type="password" placeholder="Pass">
-<button class="btn" onclick="login()">Login</button>
+<input id="loginPass" type="password" placeholder="Passwort">
+<button id="loginBtn" class="btn">Login</button>
 </div>
 </div>
 
 <div id="mainPanel" class="hidden container">
+<button id="logoutBtn">Logout</button>
 
-<button onclick="logout()">Logout</button>
-<button id="creatorBtn" class="btn hidden" onclick="toggleCreator()">Creator Panel</button>
-
-<div class="dashboard">
-<h3>Dashboard</h3>
-<div id="dashboardStats"></div>
-</div>
-
-<h3>Staff</h3>
-<input type="hidden" id="editId">
+<h3>Staff hinzufügen</h3>
 <input id="roblox" placeholder="Roblox">
 <input id="discord" placeholder="Discord">
 <select id="rank">
@@ -59,7 +49,7 @@ th{background:#111}
 <input type="number" id="tickets" placeholder="Tickets">
 <label><input type="checkbox" id="notice"> Notice</label>
 <br>
-<button class="btn-green" onclick="saveStaff()">Speichern</button>
+<button id="saveBtn" class="btn-green">Speichern</button>
 
 <table>
 <thead>
@@ -71,22 +61,18 @@ th{background:#111}
 <th>Total</th>
 <th>Tickets</th>
 <th>Notice</th>
-<th>Aktion</th>
+<th>Löschen</th>
 </tr>
 </thead>
 <tbody id="staffTable"></tbody>
 </table>
-
-<div id="creatorPanel" class="hidden">
-<h3>Logs</h3>
-<div id="logsBox" class="logs"></div>
-</div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
 const { createClient } = supabase;
 
 const supabaseClient = createClient(
@@ -96,29 +82,22 @@ const supabaseClient = createClient(
 
 const loginScreen = document.getElementById("loginScreen");
 const mainPanel = document.getElementById("mainPanel");
-const creatorBtn = document.getElementById("creatorBtn");
-const staffTable = document.getElementById("staffTable");
-const dashboardStats = document.getElementById("dashboardStats");
-const creatorPanel = document.getElementById("creatorPanel");
-const logsBox = document.getElementById("logsBox");
 
-let currentUser = "";
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+document.getElementById("saveBtn").addEventListener("click", saveStaff);
 
 async function login(){
 const user = document.getElementById("loginUser").value;
 const pass = document.getElementById("loginPass").value;
 
 if(user === "MrRecc" && pass === "andrej8968"){
-currentUser = "creator";
-creatorBtn.classList.remove("hidden");
-}else{
-alert("Login falsch");
-return;
-}
-
 loginScreen.classList.add("hidden");
 mainPanel.classList.remove("hidden");
 loadStaff();
+}else{
+alert("Login falsch");
+}
 }
 
 function logout(){
@@ -138,13 +117,10 @@ notice: document.getElementById("notice").checked
 };
 
 await supabaseClient.from("staff").insert([payload]);
-await log("Staff hinzugefügt");
-
 loadStaff();
 }
 
 async function loadStaff(){
-
 const { data, error } = await supabaseClient.from("staff").select("*");
 
 if(error){
@@ -152,17 +128,11 @@ console.error(error);
 return;
 }
 
-staffTable.innerHTML = "";
-
-let totalMin = 0;
-let totalTickets = 0;
+const table = document.getElementById("staffTable");
+table.innerHTML = "";
 
 data.forEach(s => {
-
-totalMin += s.minutesweek || 0;
-totalTickets += s.tickets || 0;
-
-staffTable.innerHTML += `
+table.innerHTML += `
 <tr>
 <td>${s.roblox}</td>
 <td>${s.discord}</td>
@@ -171,38 +141,18 @@ staffTable.innerHTML += `
 <td>${s.minutestotal}</td>
 <td>${s.tickets}</td>
 <td>${s.notice ? "⚠️" : ""}</td>
-<td><button class="btn-red" onclick="deleteStaff(${s.id})">X</button></td>
+<td><button onclick="deleteStaff(${s.id})">X</button></td>
 </tr>
 `;
 });
-
-dashboardStats.innerHTML = 
-"Gesamt Minuten: " + totalMin + "<br>" +
-"Gesamt Tickets: " + totalTickets + "<br>" +
-"Staff Anzahl: " + data.length;
-
 }
 
-async function deleteStaff(id){
+window.deleteStaff = async function(id){
 await supabaseClient.from("staff").delete().eq("id", id);
-await log("Staff gelöscht ID: " + id);
 loadStaff();
 }
 
-function toggleCreator(){
-creatorPanel.classList.toggle("hidden");
-loadLogs();
-}
-
-async function log(text){
-await supabaseClient.from("logs").insert([{message: text}]);
-loadLogs();
-}
-
-async function loadLogs(){
-const { data } = await supabaseClient.from("logs").select("*").order("id",{ascending:false});
-logsBox.innerHTML = data.map(l => l.message).join("<br>");
-}
+});
 </script>
 </body>
 </html>
