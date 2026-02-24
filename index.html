@@ -6,181 +6,79 @@
 <title>LA Staff System</title>
 
 <style>
-:root{
---bg:#0e1117;
---card:#161b22;
---accent:#5865f2;
---green:#00c853;
---red:#ff5252;
---orange:#ff9800;
---purple:#9c27b0;
---gray:#607d8b;
---text:#e6edf3;
-}
-
-body{
-margin:0;
-font-family:Inter,Arial;
-background:var(--bg);
-color:var(--text);
-}
-
+body{margin:0;font-family:Arial;background:#0f1117;color:#fff}
 .hidden{display:none}
-
-.center{
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.card{
-background:var(--card);
-padding:30px;
-border-radius:14px;
-box-shadow:0 10px 40px rgba(0,0,0,0.6);
-width:360px;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:1px solid #222;
-background:#0f141a;
-color:white;
-}
-
-button{
-padding:8px 12px;
-border-radius:8px;
-border:none;
-cursor:pointer;
-font-weight:600;
-}
-
-.btn-primary{background:var(--accent);color:white}
-.btn-green{background:var(--green);color:white}
-.btn-red{background:var(--red);color:white}
-.btn-orange{background:var(--orange);color:white}
-.btn-purple{background:var(--purple);color:white}
-.btn-gray{background:var(--gray);color:white}
-
-.container{
-padding:30px;
-max-width:1200px;
-margin:auto;
-}
-
-.dashboard{
-background:var(--card);
-padding:20px;
-border-radius:14px;
-margin-bottom:20px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px;
-}
-
-th,td{
-padding:10px;
-text-align:center;
-border-bottom:1px solid #222;
-}
-
-th{background:#11151b}
-
-.rank-owner{color:#ff5252;font-weight:bold}
-.rank-management{color:#00e5ff;font-weight:bold}
-.rank-admin{color:#ffd740;font-weight:bold}
-.rank-mod{color:#69f0ae;font-weight:bold}
-
-.logs{
-background:#0f141a;
-padding:10px;
-border-radius:10px;
-height:160px;
-overflow:auto;
-font-size:13px;
-}
+.center{display:flex;justify-content:center;align-items:center;height:100vh}
+.card{background:#1a1f2b;padding:30px;border-radius:12px;width:340px}
+input,select{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:none;background:#111;color:#fff}
+button{padding:8px 12px;border-radius:6px;border:none;cursor:pointer;margin-top:6px}
+.btn{background:#5865f2;color:#fff}
+.btn-red{background:#ff5252;color:#fff}
+.btn-green{background:#00c853;color:#fff}
+.container{padding:20px;max-width:1200px;margin:auto}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:8px;text-align:center;border-bottom:1px solid #333}
+th{background:#111}
+.dashboard{background:#1a1f2b;padding:15px;border-radius:10px;margin-bottom:20px}
+.logs{background:#111;padding:10px;border-radius:10px;height:150px;overflow:auto}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen" class="center">
 <div class="card">
-<h2>LA Staff System</h2>
-<input id="loginUser" placeholder="Benutzername">
-<input id="loginPass" type="password" placeholder="Passwort">
-<button class="btn-primary" onclick="login()">Login</button>
+<h2>Login</h2>
+<input id="loginUser" placeholder="User">
+<input id="loginPass" type="password" placeholder="Pass">
+<button class="btn" onclick="login()">Login</button>
 </div>
 </div>
 
-<!-- MAIN -->
 <div id="mainPanel" class="hidden container">
 
-<div style="margin-bottom:20px;">
 <button onclick="logout()">Logout</button>
-<button id="creatorBtn" class="btn-purple hidden" onclick="toggleCreator()">Creator Panel</button>
-<button id="lockBtn" class="btn-gray hidden" onclick="toggleLock()">Lockdown</button>
-</div>
+<button id="creatorBtn" class="btn hidden" onclick="toggleCreator()">Creator Panel</button>
 
 <div class="dashboard">
 <h3>Dashboard</h3>
 <div id="dashboardStats"></div>
-<button class="btn-primary" onclick="sortByRank()">Nach Rang sortieren</button>
 </div>
 
-<h3>Staff hinzufügen / bearbeiten</h3>
+<h3>Staff</h3>
 <input type="hidden" id="editId">
-<input id="roblox" placeholder="Roblox Username">
-<input id="discord" placeholder="Discord Username">
+<input id="roblox" placeholder="Roblox">
+<input id="discord" placeholder="Discord">
 <select id="rank">
 <option>Creator</option>
 <option>Manager</option>
-<option>Head of Administration</option>
 <option>Administration</option>
 <option>Moderator</option>
 </select>
 <input type="number" id="minutesWeek" placeholder="Minuten Woche">
 <input type="number" id="minutesTotal" placeholder="Minuten Total">
 <input type="number" id="tickets" placeholder="Tickets">
-<label><input type="checkbox" id="notice"> On Notice</label>
+<label><input type="checkbox" id="notice"> Notice</label>
 <br>
 <button class="btn-green" onclick="saveStaff()">Speichern</button>
 
-<h3>Interne Übersicht</h3>
 <table>
 <thead>
 <tr>
-<th>Roblox</th><th>Discord</th><th>Rank</th>
-<th>Woche</th><th>Total</th><th>Tickets</th>
-<th>Notice</th><th>Aktionen</th>
+<th>Roblox</th>
+<th>Discord</th>
+<th>Rank</th>
+<th>Woche</th>
+<th>Total</th>
+<th>Tickets</th>
+<th>Notice</th>
+<th>Aktion</th>
 </tr>
 </thead>
 <tbody id="staffTable"></tbody>
 </table>
 
 <div id="creatorPanel" class="hidden">
-<h3>Creator Panel</h3>
-
-<h4>Admin Verwaltung</h4>
-<input type="hidden" id="adminEditId">
-<input id="adminUser" placeholder="Admin Benutzername">
-<input id="adminPass" placeholder="Admin Passwort">
-<button class="btn-green" onclick="saveAdmin()">Admin Speichern</button>
-
-<table>
-<thead><tr><th>User</th><th>Aktionen</th></tr></thead>
-<tbody id="adminTable"></tbody>
-</table>
-
-<h4>Logs</h4>
+<h3>Logs</h3>
 <div id="logsBox" class="logs"></div>
 </div>
 
@@ -192,90 +90,79 @@ font-size:13px;
 const { createClient } = supabase;
 
 const supabaseClient = createClient(
-"https://aszymljelmsrjcdmngxc.supabase.co"
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI",
+"https://aszymljelmsrjcdmngxc.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI"
 );
 
-/* DOM */
-const loginScreen=document.getElementById("loginScreen");
-const mainPanel=document.getElementById("mainPanel");
-const creatorBtn=document.getElementById("creatorBtn");
-const lockBtn=document.getElementById("lockBtn");
-const staffTable=document.getElementById("staffTable");
-const dashboardStats=document.getElementById("dashboardStats");
-const creatorPanel=document.getElementById("creatorPanel");
-const adminTable=document.getElementById("adminTable");
-const logsBox=document.getElementById("logsBox");
+const loginScreen = document.getElementById("loginScreen");
+const mainPanel = document.getElementById("mainPanel");
+const creatorBtn = document.getElementById("creatorBtn");
+const staffTable = document.getElementById("staffTable");
+const dashboardStats = document.getElementById("dashboardStats");
+const creatorPanel = document.getElementById("creatorPanel");
+const logsBox = document.getElementById("logsBox");
 
-let currentUser="";
-let locked=false;
+let currentUser = "";
 
-/* LOGIN */
 async function login(){
-const user=loginUser.value;
-const pass=loginPass.value;
+const user = document.getElementById("loginUser").value;
+const pass = document.getElementById("loginPass").value;
 
-if(user==="MrRecc" && pass==="andrej8968"){
-currentUser="creator";
+if(user === "MrRecc" && pass === "andrej8968"){
+currentUser = "creator";
 creatorBtn.classList.remove("hidden");
-lockBtn.classList.remove("hidden");
 }else{
-const { data,error }=await supabaseClient.from("admins").select("*");
-if(error) return alert(error.message);
-const found=data.find(a=>a.user===user && a.pass===pass);
-if(!found) return alert("Login falsch");
-currentUser="admin";
+alert("Login falsch");
+return;
 }
 
 loginScreen.classList.add("hidden");
 mainPanel.classList.remove("hidden");
 loadStaff();
-if(currentUser==="creator") loadAdmins();
 }
 
-/* LOGOUT */
-function logout(){location.reload();}
+function logout(){
+location.reload();
+}
 
-/* STAFF */
 async function saveStaff(){
-if(locked) return alert("System im Lockdown!");
 
-const edit=document.getElementById("editId").value;
-
-const payload={
-roblox:roblox.value,
-discord:discord.value,
-rank:rank.value,
-minutesweek:+minutesWeek.value||0,
-minutestotal:+minutesTotal.value||0,
-tickets:+tickets.value||0,
-notice:notice.checked
+const payload = {
+roblox: document.getElementById("roblox").value,
+discord: document.getElementById("discord").value,
+rank: document.getElementById("rank").value,
+minutesweek: +document.getElementById("minutesWeek").value || 0,
+minutestotal: +document.getElementById("minutesTotal").value || 0,
+tickets: +document.getElementById("tickets").value || 0,
+notice: document.getElementById("notice").checked
 };
 
-if(edit){
-await supabaseClient.from("staff").update(payload).eq("id",edit);
-await log("Staff bearbeitet: "+roblox.value);
-}else{
 await supabaseClient.from("staff").insert([payload]);
-await log("Staff hinzugefügt: "+roblox.value);
-}
+await log("Staff hinzugefügt");
 
-document.getElementById("editId").value="";
 loadStaff();
 }
 
 async function loadStaff(){
-const { data,error }=await supabaseClient.from("staff").select("*");
-if(error) return console.error(error);
 
-staffTable.innerHTML="";
-let totalMin=0,totalTickets=0;
+const { data, error } = await supabaseClient.from("staff").select("*");
 
-data.forEach(s=>{
-totalMin+=s.minutesweek||0;
-totalTickets+=s.tickets||0;
+if(error){
+console.error(error);
+return;
+}
 
-staffTable.innerHTML+=`
+staffTable.innerHTML = "";
+
+let totalMin = 0;
+let totalTickets = 0;
+
+data.forEach(s => {
+
+totalMin += s.minutesweek || 0;
+totalTickets += s.tickets || 0;
+
+staffTable.innerHTML += `
 <tr>
 <td>${s.roblox}</td>
 <td>${s.discord}</td>
@@ -283,127 +170,39 @@ staffTable.innerHTML+=`
 <td>${s.minutesweek}</td>
 <td>${s.minutestotal}</td>
 <td>${s.tickets}</td>
-<td>${s.notice?"⚠️":""}</td>
-<td>
-<button class="btn-orange" onclick="editStaff(${s.id})">Edit</button>
-<button class="btn-red" onclick="deleteStaff(${s.id})">X</button>
-</td>
-</tr>`;
+<td>${s.notice ? "⚠️" : ""}</td>
+<td><button class="btn-red" onclick="deleteStaff(${s.id})">X</button></td>
+</tr>
+`;
 });
 
-dashboardStats.innerHTML=
-`Gesamt Minuten: <b>${totalMin}</b><br>
-Gesamt Tickets: <b>${totalTickets}</b><br>
-Staff Anzahl: <b>${data.length}</b>`;
-}
+dashboardStats.innerHTML = 
+"Gesamt Minuten: " + totalMin + "<br>" +
+"Gesamt Tickets: " + totalTickets + "<br>" +
+"Staff Anzahl: " + data.length;
 
-async function editStaff(id){
-const { data }=await supabaseClient.from("staff").select("*").eq("id",id);
-const s=data[0];
-editId.value=s.id;
-roblox.value=s.roblox;
-discord.value=s.discord;
-rank.value=s.rank;
-minutesWeek.value=s.minutesweek;
-minutesTotal.value=s.minutestotal;
-tickets.value=s.tickets;
-notice.checked=s.notice;
 }
 
 async function deleteStaff(id){
-await supabaseClient.from("staff").delete().eq("id",id);
-await log("Staff gelöscht ID: "+id);
+await supabaseClient.from("staff").delete().eq("id", id);
+await log("Staff gelöscht ID: " + id);
 loadStaff();
 }
 
-/* ADMIN */
-async function saveAdmin(){
-const edit=document.getElementById("adminEditId").value;
-const payload={user:adminUser.value,pass:adminPass.value};
-
-if(edit){
-await supabaseClient.from("admins").update(payload).eq("id",edit);
-await log("Admin bearbeitet: "+adminUser.value);
-}else{
-await supabaseClient.from("admins").insert([payload]);
-await log("Admin erstellt: "+adminUser.value);
+function toggleCreator(){
+creatorPanel.classList.toggle("hidden");
+loadLogs();
 }
 
-document.getElementById("adminEditId").value="";
-loadAdmins();
-}
-
-async function loadAdmins(){
-const { data }=await supabaseClient.from("admins").select("*");
-adminTable.innerHTML="";
-data.forEach(a=>{
-adminTable.innerHTML+=`
-<tr>
-<td>${a.user}</td>
-<td>
-<button class="btn-orange" onclick="editAdmin(${a.id})">Edit</button>
-<button class="btn-red" onclick="deleteAdmin(${a.id})">X</button>
-</td>
-</tr>`;
-});
-}
-
-async function editAdmin(id){
-const { data }=await supabaseClient.from("admins").select("*").eq("id",id);
-const a=data[0];
-adminEditId.value=a.id;
-adminUser.value=a.user;
-adminPass.value=a.pass;
-}
-
-async function deleteAdmin(id){
-await supabaseClient.from("admins").delete().eq("id",id);
-await log("Admin gelöscht ID: "+id);
-loadAdmins();
-}
-
-/* LOCK */
-function toggleLock(){
-locked=!locked;
-log("Lockdown: "+(locked?"Aktiviert":"Deaktiviert"));
-}
-
-/* LOGS */
 async function log(text){
-await supabaseClient.from("logs").insert([{message:text}]);
+await supabaseClient.from("logs").insert([{message: text}]);
 loadLogs();
 }
 
 async function loadLogs(){
-const { data }=await supabaseClient.from("logs").select("*").order("id",{ascending:false});
-logsBox.innerHTML=data.map(l=>l.message).join("<br>");
-}
-
-/* SORT */
-async function sortByRank(){
-const order=["Creator","Manager","Head of Administration","Administration","Moderator"];
-const { data }=await supabaseClient.from("staff").select("*");
-data.sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank));
-staffTable.innerHTML="";
-data.forEach(s=>{
-staffTable.innerHTML+=`
-<tr>
-<td>${s.roblox}</td>
-<td>${s.discord}</td>
-<td>${s.rank}</td>
-<td>${s.minutesweek}</td>
-<td>${s.minutestotal}</td>
-<td>${s.tickets}</td>
-<td>${s.notice?"⚠️":""}</td>
-<td>
-<button class="btn-orange" onclick="editStaff(${s.id})">Edit</button>
-<button class="btn-red" onclick="deleteStaff(${s.id})">X</button>
-</td>
-</tr>`;
-});
+const { data } = await supabaseClient.from("logs").select("*").order("id",{ascending:false});
+logsBox.innerHTML = data.map(l => l.message).join("<br>");
 }
 </script>
 </body>
 </html>
-
-
