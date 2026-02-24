@@ -6,55 +6,134 @@
 <title>LA Staff System</title>
 
 <style>
-body{font-family:Arial;background:#0f0f0f;color:white;margin:0}
-.center-login{display:flex;justify-content:center;align-items:center;height:100vh}
-.login-box{background:#1a1a1a;padding:30px;border-radius:10px;width:320px;text-align:center}
-input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:none}
-button{padding:6px 10px;margin:4px;border:none;border-radius:5px;cursor:pointer}
+:root{
+--bg:#0e1117;
+--card:#161b22;
+--accent:#5865f2;
+--green:#00c853;
+--red:#ff5252;
+--orange:#ff9800;
+--purple:#9c27b0;
+--gray:#607d8b;
+--text:#e6edf3;
+}
 
-.save{background:#00c853;color:white}
-.edit{background:#ff9800;color:white}
-.delete{background:#d32f2f;color:white}
-.creator{background:#9c27b0;color:white}
-.lock{background:#607d8b;color:white}
-.sort{background:#3f51b5;color:white}
+body{
+margin:0;
+font-family:Inter,Arial;
+background:var(--bg);
+color:var(--text);
+}
 
 .hidden{display:none}
-.container{padding:20px}
 
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:6px;border-bottom:1px solid #333;text-align:center}
-th{background:#1f1f1f}
+.center{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:var(--card);
+padding:30px;
+border-radius:14px;
+box-shadow:0 10px 40px rgba(0,0,0,0.6);
+width:360px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin:6px 0;
+border-radius:8px;
+border:1px solid #222;
+background:#0f141a;
+color:white;
+}
+
+button{
+padding:8px 12px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+font-weight:600;
+}
+
+.btn-primary{background:var(--accent);color:white}
+.btn-green{background:var(--green);color:white}
+.btn-red{background:var(--red);color:white}
+.btn-orange{background:var(--orange);color:white}
+.btn-purple{background:var(--purple);color:white}
+.btn-gray{background:var(--gray);color:white}
+
+.container{
+padding:30px;
+max-width:1200px;
+margin:auto;
+}
+
+.dashboard{
+background:var(--card);
+padding:20px;
+border-radius:14px;
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+padding:10px;
+text-align:center;
+border-bottom:1px solid #222;
+}
+
+th{background:#11151b}
 
 .rank-owner{color:#ff5252;font-weight:bold}
 .rank-management{color:#00e5ff;font-weight:bold}
 .rank-admin{color:#ffd740;font-weight:bold}
 .rank-mod{color:#69f0ae;font-weight:bold}
 
-.dashboard{background:#1a1a1a;padding:15px;border-radius:10px;margin-bottom:15px}
+.logs{
+background:#0f141a;
+padding:10px;
+border-radius:10px;
+height:160px;
+overflow:auto;
+font-size:13px;
+}
 </style>
 </head>
 <body>
 
-<div class="center-login" id="loginScreen">
-<div class="login-box">
-<h2>Login</h2>
+<!-- LOGIN -->
+<div id="loginScreen" class="center">
+<div class="card">
+<h2>LA Staff System</h2>
 <input id="loginUser" placeholder="Benutzername">
 <input id="loginPass" type="password" placeholder="Passwort">
-<button class="save" onclick="login()">Login</button>
+<button class="btn-primary" onclick="login()">Login</button>
 </div>
 </div>
 
+<!-- MAIN -->
 <div id="mainPanel" class="hidden container">
 
+<div style="margin-bottom:20px;">
 <button onclick="logout()">Logout</button>
-<button class="creator hidden" id="creatorBtn" onclick="toggleCreator()">Creator Panel</button>
-<button class="lock hidden" id="lockBtn" onclick="toggleLock()">Lockdown</button>
+<button id="creatorBtn" class="btn-purple hidden" onclick="toggleCreator()">Creator Panel</button>
+<button id="lockBtn" class="btn-gray hidden" onclick="toggleLock()">Lockdown</button>
+</div>
 
 <div class="dashboard">
-<h3>Wochen Dashboard</h3>
+<h3>Dashboard</h3>
 <div id="dashboardStats"></div>
-<button class="sort" onclick="sortByRank()">Nach Rang sortieren</button>
+<button class="btn-primary" onclick="sortByRank()">Nach Rang sortieren</button>
 </div>
 
 <h3>Staff hinzufügen / bearbeiten</h3>
@@ -72,7 +151,8 @@ th{background:#1f1f1f}
 <input type="number" id="minutesTotal" placeholder="Minuten Total">
 <input type="number" id="tickets" placeholder="Tickets">
 <label><input type="checkbox" id="notice"> On Notice</label>
-<button class="save" onclick="saveStaff()">Speichern</button>
+<br>
+<button class="btn-green" onclick="saveStaff()">Speichern</button>
 
 <h3>Interne Übersicht</h3>
 <table>
@@ -93,17 +173,17 @@ th{background:#1f1f1f}
 <input type="hidden" id="adminEditId">
 <input id="adminUser" placeholder="Admin Benutzername">
 <input id="adminPass" placeholder="Admin Passwort">
-<button class="save" onclick="saveAdmin()">Admin Speichern</button>
+<button class="btn-green" onclick="saveAdmin()">Admin Speichern</button>
 
 <table>
 <thead><tr><th>User</th><th>Aktionen</th></tr></thead>
 <tbody id="adminTable"></tbody>
 </table>
 
-<h4>Creator Logs</h4>
-<div id="logsBox" style="background:#111;padding:10px;height:150px;overflow:auto"></div>
-
+<h4>Logs</h4>
+<div id="logsBox" class="logs"></div>
 </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -116,18 +196,21 @@ const supabaseClient = createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzenltbGplbG1zcmpjZG1uZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NzEwNzUsImV4cCI6MjA4NzQ0NzA3NX0.NQmSUGt_NqIHojweHJszfiJ82ElTmLSXYF4eBEEVWeI"
 );
 
+/* DOM */
+const loginScreen=document.getElementById("loginScreen");
+const mainPanel=document.getElementById("mainPanel");
+const creatorBtn=document.getElementById("creatorBtn");
+const lockBtn=document.getElementById("lockBtn");
+const staffTable=document.getElementById("staffTable");
+const dashboardStats=document.getElementById("dashboardStats");
+const creatorPanel=document.getElementById("creatorPanel");
+const adminTable=document.getElementById("adminTable");
+const logsBox=document.getElementById("logsBox");
+
 let currentUser="";
 let locked=false;
 
-function getRankClass(rank){
-if(rank==="Creator") return "rank-owner";
-if(rank==="Manager") return "rank-management";
-if(rank.includes("Administration")) return "rank-admin";
-return "rank-mod";
-}
-
-function logout(){ location.reload(); }
-
+/* LOGIN */
 async function login(){
 const user=loginUser.value;
 const pass=loginPass.value;
@@ -136,9 +219,9 @@ if(user==="MrRecc" && pass==="andrej8968"){
 currentUser="creator";
 creatorBtn.classList.remove("hidden");
 lockBtn.classList.remove("hidden");
-}
-else{
-const { data } = await supabaseClient.from("admins").select("*");
+}else{
+const { data,error }=await supabaseClient.from("admins").select("*");
+if(error) return alert(error.message);
 const found=data.find(a=>a.user===user && a.pass===pass);
 if(!found) return alert("Login falsch");
 currentUser="admin";
@@ -150,42 +233,41 @@ loadStaff();
 if(currentUser==="creator") loadAdmins();
 }
 
+/* LOGOUT */
+function logout(){location.reload();}
+
+/* STAFF */
 async function saveStaff(){
 if(locked) return alert("System im Lockdown!");
 
-const edit=editId.value;
+const edit=document.getElementById("editId").value;
+
+const payload={
+roblox:roblox.value,
+discord:discord.value,
+rank:rank.value,
+minutesweek:+minutesWeek.value||0,
+minutestotal:+minutesTotal.value||0,
+tickets:+tickets.value||0,
+notice:notice.checked
+};
 
 if(edit){
-await supabaseClient.from("staff").update({
-roblox:roblox.value,
-discord:discord.value,
-rank:rank.value,
-minutesweek:+minutesWeek.value||0,
-minutestotal:+minutesTotal.value||0,
-tickets:+tickets.value||0,
-notice:notice.checked
-}).eq("id",edit);
-log("Staff bearbeitet");
-}
-else{
-await supabaseClient.from("staff").insert([{
-roblox:roblox.value,
-discord:discord.value,
-rank:rank.value,
-minutesweek:+minutesWeek.value||0,
-minutestotal:+minutesTotal.value||0,
-tickets:+tickets.value||0,
-notice:notice.checked
-}]);
-log("Staff hinzugefügt");
+await supabaseClient.from("staff").update(payload).eq("id",edit);
+await log("Staff bearbeitet: "+roblox.value);
+}else{
+await supabaseClient.from("staff").insert([payload]);
+await log("Staff hinzugefügt: "+roblox.value);
 }
 
-editId.value="";
+document.getElementById("editId").value="";
 loadStaff();
 }
 
 async function loadStaff(){
-const { data } = await supabaseClient.from("staff").select("*");
+const { data,error }=await supabaseClient.from("staff").select("*");
+if(error) return console.error(error);
+
 staffTable.innerHTML="";
 let totalMin=0,totalTickets=0;
 
@@ -197,26 +279,26 @@ staffTable.innerHTML+=`
 <tr>
 <td>${s.roblox}</td>
 <td>${s.discord}</td>
-<td class="${getRankClass(s.rank)}">${s.rank}</td>
+<td>${s.rank}</td>
 <td>${s.minutesweek}</td>
 <td>${s.minutestotal}</td>
 <td>${s.tickets}</td>
 <td>${s.notice?"⚠️":""}</td>
 <td>
-<button class="edit" onclick="editStaff(${s.id})">Bearbeiten</button>
-<button class="delete" onclick="deleteStaff(${s.id})">X</button>
+<button class="btn-orange" onclick="editStaff(${s.id})">Edit</button>
+<button class="btn-red" onclick="deleteStaff(${s.id})">X</button>
 </td>
 </tr>`;
 });
 
 dashboardStats.innerHTML=
-"Gesamt Minuten: "+totalMin+
-"<br>Gesamt Tickets: "+totalTickets+
-"<br>Staff Anzahl: "+data.length;
+`Gesamt Minuten: <b>${totalMin}</b><br>
+Gesamt Tickets: <b>${totalTickets}</b><br>
+Staff Anzahl: <b>${data.length}</b>`;
 }
 
 async function editStaff(id){
-const { data } = await supabaseClient.from("staff").select("*").eq("id",id);
+const { data }=await supabaseClient.from("staff").select("*").eq("id",id);
 const s=data[0];
 editId.value=s.id;
 roblox.value=s.roblox;
@@ -230,59 +312,44 @@ notice.checked=s.notice;
 
 async function deleteStaff(id){
 await supabaseClient.from("staff").delete().eq("id",id);
-log("Staff gelöscht");
+await log("Staff gelöscht ID: "+id);
 loadStaff();
 }
 
-function toggleCreator(){
-creatorPanel.classList.toggle("hidden");
-loadLogs();
-}
-
-function toggleLock(){
-locked=!locked;
-log("Lockdown geändert");
-}
-
+/* ADMIN */
 async function saveAdmin(){
-const edit=adminEditId.value;
+const edit=document.getElementById("adminEditId").value;
+const payload={user:adminUser.value,pass:adminPass.value};
 
 if(edit){
-await supabaseClient.from("admins").update({
-user:adminUser.value,
-pass:adminPass.value
-}).eq("id",edit);
-log("Admin bearbeitet");
-}
-else{
-await supabaseClient.from("admins").insert([{
-user:adminUser.value,
-pass:adminPass.value
-}]);
-log("Admin erstellt");
+await supabaseClient.from("admins").update(payload).eq("id",edit);
+await log("Admin bearbeitet: "+adminUser.value);
+}else{
+await supabaseClient.from("admins").insert([payload]);
+await log("Admin erstellt: "+adminUser.value);
 }
 
-adminEditId.value="";
+document.getElementById("adminEditId").value="";
 loadAdmins();
 }
 
 async function loadAdmins(){
-const { data } = await supabaseClient.from("admins").select("*");
+const { data }=await supabaseClient.from("admins").select("*");
 adminTable.innerHTML="";
 data.forEach(a=>{
 adminTable.innerHTML+=`
 <tr>
 <td>${a.user}</td>
 <td>
-<button class="edit" onclick="editAdmin(${a.id})">Bearbeiten</button>
-<button class="delete" onclick="deleteAdmin(${a.id})">X</button>
+<button class="btn-orange" onclick="editAdmin(${a.id})">Edit</button>
+<button class="btn-red" onclick="deleteAdmin(${a.id})">X</button>
 </td>
 </tr>`;
 });
 }
 
 async function editAdmin(id){
-const { data } = await supabaseClient.from("admins").select("*").eq("id",id);
+const { data }=await supabaseClient.from("admins").select("*").eq("id",id);
 const a=data[0];
 adminEditId.value=a.id;
 adminUser.value=a.user;
@@ -291,28 +358,49 @@ adminPass.value=a.pass;
 
 async function deleteAdmin(id){
 await supabaseClient.from("admins").delete().eq("id",id);
-log("Admin gelöscht");
+await log("Admin gelöscht ID: "+id);
 loadAdmins();
 }
 
-async function sortByRank(){
-const order=["Creator","Manager","Head of Administration","Administration","Moderator"];
-const { data } = await supabaseClient.from("staff").select("*");
-data.sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank));
-for(let i=0;i<data.length;i++){
-await supabaseClient.from("staff").update({created_at:new Date()}).eq("id",data[i].id);
-}
-loadStaff();
+/* LOCK */
+function toggleLock(){
+locked=!locked;
+log("Lockdown: "+(locked?"Aktiviert":"Deaktiviert"));
 }
 
+/* LOGS */
 async function log(text){
 await supabaseClient.from("logs").insert([{message:text}]);
 loadLogs();
 }
 
 async function loadLogs(){
-const { data } = await supabaseClient.from("logs").select("*").order("id",{ascending:false});
+const { data }=await supabaseClient.from("logs").select("*").order("id",{ascending:false});
 logsBox.innerHTML=data.map(l=>l.message).join("<br>");
+}
+
+/* SORT */
+async function sortByRank(){
+const order=["Creator","Manager","Head of Administration","Administration","Moderator"];
+const { data }=await supabaseClient.from("staff").select("*");
+data.sort((a,b)=>order.indexOf(a.rank)-order.indexOf(b.rank));
+staffTable.innerHTML="";
+data.forEach(s=>{
+staffTable.innerHTML+=`
+<tr>
+<td>${s.roblox}</td>
+<td>${s.discord}</td>
+<td>${s.rank}</td>
+<td>${s.minutesweek}</td>
+<td>${s.minutestotal}</td>
+<td>${s.tickets}</td>
+<td>${s.notice?"⚠️":""}</td>
+<td>
+<button class="btn-orange" onclick="editStaff(${s.id})">Edit</button>
+<button class="btn-red" onclick="deleteStaff(${s.id})">X</button>
+</td>
+</tr>`;
+});
 }
 </script>
 </body>
