@@ -166,7 +166,22 @@ return "";
 
 <script>
 
-/* LOGIN DATA */
+// =======================
+// SUPABASE CONFIG
+// =======================
+
+const SUPABASE_URL = "HIER_DEINE_URL_EINFÜGEN";
+const SUPABASE_ANON_KEY = "HIER_DEIN_ANON_KEY_EINFÜGEN";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+// =======================
+// LOGIN DATA
+// =======================
+
 const CREATOR_USER="MrRecc";
 const CREATOR_PASS="andrej8968";
 const MASTER_PASSWORD="MASTERKEY1711";
@@ -175,13 +190,15 @@ let currentUser="";
 let locked=false;
 let deleteCounter=0;
 
-/* LOGIN */
+// =======================
+// LOGIN
+// =======================
+
 function login(){
 if(locked){ alert("System ist im Lockdown!"); return; }
 
 const user=loginUser.value;
 const pass=loginPass.value;
-const admins=JSON.parse(localStorage.getItem("admins"))||[];
 
 if(user===CREATOR_USER && pass===CREATOR_PASS){
 currentUser="creator";
@@ -189,25 +206,136 @@ creatorBtn.classList.remove("hidden");
 lockBtn.classList.remove("hidden");
 }
 else{
-const found=admins.find(a=>a.user===user && a.pass===pass);
-if(!found){ alert("Login falsch"); return; }
-currentUser="admin";
+alert("Login falsch");
+return;
 }
 
 loginScreen.classList.add("hidden");
 mainPanel.classList.remove("hidden");
 loadStaff();
-if(currentUser==="creator") loadAdmins();
 }
 
-/* LOGOUT */
+// =======================
+// LOGOUT
+// =======================
+
 function logout(){ location.reload(); }
 
-/* LOCK SYSTEM */
+// =======================
+// SAVE STAFF (SUPABASE)
+// =======================
+
+async function saveStaff(){
+
+if(locked) return alert("System ist im Lockdown!");
+
+const { error } = await supabase
+.from("staff")
+.insert([{
+roblox: roblox.value,
+discord: discord.value,
+rank: rank.value,
+minutesweek: +minutesWeek.value || 0,
+minutestotal: +minutesTotal.value || 0,
+tickets: +tickets.value || 0,
+notice: notice.checked
+}]);
+
+if(error){
+alert("Fehler: "+error.message);
+console.error(error);
+}
+else{
+loadStaff();
+}
+}
+
+// =======================
+// DELETE STAFF
+// =======================
+
+async function deleteStaff(id){
+
+if(currentUser!=="creator") return;
+
+const { error } = await supabase
+.from("staff")
+.delete()
+.eq("id", id);
+
+if(error){
+alert("Fehler beim Löschen");
+console.error(error);
+}
+else{
+loadStaff();
+}
+}
+
+// =======================
+// LOAD STAFF
+// =======================
+
+async function loadStaff(){
+
+const { data, error } = await supabase
+.from("staff")
+.select("*")
+.order("rank",{ascending:true});
+
+if(error){
+console.error(error);
+return;
+}
+
+staffTable.innerHTML="";
+publicStaffTable.innerHTML="";
+
+let totalMinutes=0;
+let totalTickets=0;
+
+data.forEach((s)=>{
+
+totalMinutes+=s.minutesweek || 0;
+totalTickets+=s.tickets || 0;
+
+staffTable.innerHTML+=`
+<tr>
+<td>${s.roblox}</td>
+<td>${s.discord}</td>
+<td>${s.rank}</td>
+<td>${s.minutesweek}</td>
+<td>${s.minutestotal}</td>
+<td>${s.tickets}</td>
+<td>${s.notice?"⚠️":""}</td>
+<td><button class="delete-btn" onclick="deleteStaff('${s.id}')">X</button></td>
+</tr>`;
+
+publicStaffTable.innerHTML+=`
+<tr>
+<td>${s.roblox}</td>
+<td>${s.rank}</td>
+<td>${s.minutesweek}</td>
+<td>${s.minutestotal}</td>
+<td>${s.tickets}</td>
+</tr>`;
+
+});
+
+dashboardStats.innerHTML=`
+Gesamt Minuten: <b>${totalMinutes}</b><br>
+Gesamt Tickets: <b>${totalTickets}</b><br>
+Staff Anzahl: <b>${data.length}</b>
+`;
+}
+
+// =======================
+// LOCK SYSTEM
+// =======================
+
 function lockSystem(){
 if(currentUser!=="creator") return;
 locked=true;
-log("LOCKDOWN aktiviert");
 alert("System gesperrt");
 }
 
@@ -215,145 +343,25 @@ function unlockSystem(){
 const key=prompt("Creator Passwort:");
 if(key===CREATOR_PASS){
 locked=false;
-log("LOCKDOWN aufgehoben");
 alert("System entsperrt");
 }
 }
 
-/* LOGS */
-function log(text){
-const logs=JSON.parse(localStorage.getItem("logs"))||[];
-logs.push(new Date().toLocaleString()+" - "+text);
-localStorage.setItem("logs",JSON.stringify(logs));
-loadLogs();
-}
+// =======================
+// PUBLIC TOGGLE
+// =======================
 
-function loadLogs(){
-const logs=JSON.parse(localStorage.getItem("logs"))||[];
-logsBox.innerHTML=logs.join("<br>");
-}
-
-/* STORAGE */
-function getStaff(){ return JSON.parse(localStorage.getItem("staff"))||[]; }
-function saveStaffData(data){
-localStorage.setItem("staff",JSON.stringify(data));
-loadStaff();
-}
-
-/* SAVE STAFF */
-function saveStaff(){
-let staff=getStaff();
-staff.push({
-roblox:roblox.value,
-discord:discord.value,
-rank:rank.value,
-minutesWeek:+minutesWeek.value||0,
-minutesTotal:+minutesTotal.value||0,
-tickets:+tickets.value||0,
-notice:notice.checked
-});
-saveStaffData(staff);
-}
-
-/* DELETE */
-function deleteStaff(i){
-deleteCounter++;
-if(deleteCounter>3){
-const pw=prompt("Master Passwort:");
-if(pw!==MASTER_PASSWORD) return alert("Falsches Master Passwort");
-deleteCounter=0;
-}
-let staff=getStaff();
-log("Staff gelöscht: "+staff[i].roblox);
-staff.splice(i,1);
-saveStaffData(staff);
-}
-
-/* SORT */
-const rankOrder=[ "Creator","Co-Creator","Projektleitung","Stv.Projektleitung","Manager","Community Manager","Teamverwaltung","Stv. Teamverwaltung","Head of Administration","Head of Moderation","Senior Administration","Administration","Junior Administration","Senior Moderator","Moderator","Junior Moderator"];
-
-function sortByRank(){
-if(currentUser!=="creator" && currentUser!=="admin") return;
-let staff=getStaff();
-staff.sort((a,b)=>rankOrder.indexOf(a.rank)-rankOrder.indexOf(b.rank));
-saveStaffData(staff);
-}
-
-/* LOAD STAFF */
-function loadStaff(){
-let staff=getStaff();
-staffTable.innerHTML="";
-publicStaffTable.innerHTML="";
-
-let totalMinutes=0,totalTickets=0;
-
-staff.forEach((s,i)=>{
-totalMinutes+=s.minutesWeek;
-totalTickets+=s.tickets;
-
-staffTable.innerHTML+=`
-<tr draggable="${currentUser}">
-<td>${s.roblox}</td>
-<td>${s.discord}</td>
-<td>${s.rank}</td>
-<td>${s.minutesWeek}</td>
-<td>${s.minutesTotal}</td>
-<td>${s.tickets}</td>
-<td>${s.notice?"⚠️":""}</td>
-<td><button class="delete-btn" onclick="deleteStaff(${i})">X</button></td>
-</tr>`;
-
-publicStaffTable.innerHTML+=`
-<tr>
-<td>${s.roblox}</td>
-<td>${s.rank}</td>
-<td>${s.minutesWeek}</td>
-<td>${s.minutesTotal}</td>
-<td>${s.tickets}</td>
-</tr>`;
-});
-
-dashboardStats.innerHTML=`
-Gesamt Minuten: <b>${totalMinutes}</b><br>
-Gesamt Tickets: <b>${totalTickets}</b><br>
-Staff Anzahl: <b>${staff.length}</b>
-`;
-}
-
-/* ADMIN SYSTEM */
-function saveAdmin(){
-if(currentUser!=="creator") return;
-let admins=JSON.parse(localStorage.getItem("admins"))||[];
-admins.push({user:adminUser.value,pass:adminPass.value});
-localStorage.setItem("admins",JSON.stringify(admins));
-loadAdmins();
-}
-
-function loadAdmins(){
-let admins=JSON.parse(localStorage.getItem("admins"))||[];
-adminTable.innerHTML="";
-admins.forEach((a,i)=>{
-adminTable.innerHTML+=`
-<tr>
-<td>${a.user}</td>
-<td><button onclick="admins.splice(${i},1);localStorage.setItem('admins',JSON.stringify(admins));loadAdmins()">X</button></td>
-</tr>`;
-});
-}
-
-function toggleCreator(){
-creatorPanel.classList.toggle("hidden");
-loadLogs();
-}
-
-/* PUBLIC TOGGLE */
 function togglePublic(){
 publicSection.classList.toggle("hidden");
 }
 
-/* INIT */
-document.addEventListener("DOMContentLoaded",loadStaff);
+// =======================
+// INIT
+// =======================
+
+document.addEventListener("DOMContentLoaded", loadStaff);
 
 </script>
 </body>
 </html>
+
